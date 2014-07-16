@@ -3,13 +3,18 @@ namespace samson\esputnik;
 
 use samson\core\iModuleCompressable;
 
+/* Main class for sending messages  via eSputnik service */
 class eSputnik extends \samson\core\Service implements iModuleCompressable
 {
     protected $id = 'esputnik';
     protected $sUrl  = 'https://esputnik.com.ua/api/v1/message/sms';
 
     public $module = 'esputnik';
+
+    /* Login for account on eSputnik service */
     public $login;
+
+    /* Password for account on eSputnik service */
     public $password;
 
     public function beforeCompress(& $obj = null, array & $code = null)
@@ -22,6 +27,11 @@ class eSputnik extends \samson\core\Service implements iModuleCompressable
 		
 	}
 
+    /** Send SMS with text
+     * @param string $text Text for SMS
+     * @param array  $phones Phone list of recipients
+     * @param string $from Sender's name
+     */
     public function send($text, $phones = array('380634202325'), $from = 'SamsonOS')
     {
         $json_value = new \stdClass();
