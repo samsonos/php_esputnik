@@ -8,6 +8,7 @@ class eSputnik extends \samson\core\Service implements iModuleCompressable
 {
     protected $id = 'esputnik';
     protected $sUrl  = 'https://esputnik.com.ua/api/v1/message/sms';
+    protected $ccUrl = 'https://esputnik.com.ua/api/v1/contact';
 
     public $module = 'esputnik';
 
@@ -45,9 +46,33 @@ class eSputnik extends \samson\core\Service implements iModuleCompressable
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json'));
         curl_setopt($ch, CURLOPT_URL, $this->sUrl);
-        curl_setopt($ch,CURLOPT_USERPWD, $this->login.':'.$this->password);
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->login.':'.$this->password);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         curl_close($ch);
+    }
+
+    /**
+     * Adds new contact
+     * @param string $firstName person first name
+     * @param array $channels array of channels represented with arrays which contain pare type => value.
+     * There are two types of first parameter: sms and email. Value is string field.
+     */
+    public function createContact($firstName, $channels = array(array('type' => 'sms', 'value' => '380634202325')))
+    {
+        $contact = new \stdClass();
+        $contact->firstName = $firstName;
+        $contact->channels = $channels;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($contact));
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_URL, $this->ccUrl);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->login.':'.$this->password);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        curl_close($ch);
+//        echo $output;
     }
 }
