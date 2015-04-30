@@ -9,6 +9,7 @@ class eSputnik extends \samson\core\Service implements iModuleCompressable
     protected $id = 'esputnik';
     protected $sUrl  = 'https://esputnik.com.ua/api/v1/message/sms';
     protected $ccUrl = 'https://esputnik.com.ua/api/v1/contact';
+	protected $updUrl = 'https://esputnik.com.ua/api/v1/contacts';
 
     public $module = 'esputnik';
 
@@ -17,6 +18,9 @@ class eSputnik extends \samson\core\Service implements iModuleCompressable
 
     /* Password for account on eSputnik service */
     public $password;
+	
+	/* Contacts custom fields identifiers */
+	public $customFieldsIDs = array();
 
     public function beforeCompress(& $obj = null, array & $code = null)
 	{
@@ -73,6 +77,31 @@ class eSputnik extends \samson\core\Service implements iModuleCompressable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         curl_close($ch);
-//        echo $output;
+    }
+	
+	public function updateContacts($firstName, $email, $groups = array(), $fields = array())
+    {
+        $contact = new \stdClass();
+        $contact->firstName = $firstName;
+        $contact->channels = array(array('type'=>'email', 'value' => $email));
+        $contact->fields = $fields;
+
+        $request_entity = new \stdClass();
+        $request_entity->contacts = array($contact);
+        $request_entity->dedupeOn = 'email';
+        $request_entity->contactFields = array('firstName', 'email');
+        $request_entity->groupNames = $groups;
+        $request_entity->customFieldsIDs = $this->customFieldsIDs;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request_entity));
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_URL, $this->updUrl);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->login.':'.$this->password);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        curl_close($ch);
     }
 }
